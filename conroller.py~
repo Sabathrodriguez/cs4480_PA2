@@ -1,0 +1,7 @@
+#@author: sabath rodriguez
+#@classname: controller.py
+#@summary: software defined networking controller, used to send flow table to our router
+
+class Node:
+    def __init__(self):
+        self.forwarding_table = {};
