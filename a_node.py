@@ -24,8 +24,7 @@ class A:
 		self.srcp = self.generate_random_data(49)
 		self.destp = self.generate_random_data(49)
 		string_a = str(self.srca) +" "+ str(self.desta) +" "+ str(self.srcp) +" "+ str(self.destp) + " \n " + message
-		print(string_a)
-		self.nodeA_socket.sendto(string_a, (self.router_IP, self.router_port))
+		self.nodeA_socket.sendto(string_a.encode(), (self.router_IP, self.router_port))
 
 	def generate_random_data(self, var_max):
 		var = str(random.randrange(0,var_max))
@@ -34,4 +33,11 @@ class A:
 		
 nodeA = A()
 for i in range(0, 100):
-        nodeA.send_data("iphones are better than androids all day")
+        nodeA.send_data('''This is pointless, we shouldnt have to write 508 bytes specifically. This is pointless, we shouldnt have to write 508 bytes specifically.
+This is pointless, we shouldnt have to write 508 bytes specifically.
+This is pointless, we shouldnt have to write 508 bytes specifically.
+This is pointless, we shouldnt have to write 508 bytes specifically.
+This is pointless, we shouldnt have to write 508 bytes specifically.
+This is pointless, we shouldnt have to write 508 bytes specifically.
+This is pointless, we ye ye ye y
+''')

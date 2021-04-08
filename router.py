@@ -30,12 +30,8 @@ class Router:
         for temp in str(self.controller_socket.recv(1024)).split("\n"):
             self.flow_table.append(temp)
         for temp in self.flow_table:
-            print("-----------------------")
             self.parse_flowtable(temp)
 
-            print("matches: " + str(self.matches))
-            print("actions: " + str(self.actions))
-            print("stats: " + str(self.statistics))	
         self.controller_socket.close()
 
     def start_router(self):
@@ -43,18 +39,9 @@ class Router:
         
         self.router_socket.bind((self.IP, self.router_port))
 
-        self.table.append([self.matches[0], self.actions[0], self.statistics[0]])
-        self.table.append([self.matches[1], self.actions[1], self.statistics[1]])
-        self.table.append([self.matches[2], self.actions[2], self.statistics[2]])
-        self.table.append([self.matches[3], self.actions[3], self.statistics[3]])
-
-        for s in self.table:
-            print(str(s))
         while True:
-            print("UDP server up and listening")
 
             while True:
-                print("UDP connection waiting")
                 bytesAddressPair = self.router_socket.recvfrom(1024)
 
                 message = bytesAddressPair[0]
@@ -67,20 +54,18 @@ class Router:
                 self.dest_IP = parsed_transport_data[1]
                 self.srcp = parsed_transport_data[2]
                 self.destp = parsed_transport_data[3]
-
-                for s in range(len(self.table)):
-                    if self.message_action(self.table[s][0], self.table[s][1], self.src_IP, self.srcp, self.dest_IP, self.destp):
-                        self.router_socket.sendto(message_bits[1], ("127.0.0.1",5000))
 					
- #               for match in self.matches:
-  #                  for action in self.actions:
-   #                     if self.message_action(match, action, self.src_IP, self.srcp, self.dest_IP, self.destp):
-    #                        self.router_socket.sendto(message_bits[1], ("127.0.0.1",5000))
+                for match in self.matches:
+                    for action in self.actions:
+                        if self.message_action(match, action, self.src_IP, self.srcp, self.dest_IP, self.destp):
+                            self.router_socket.sendto(message, ("127.0.0.1",5000))
+                print("flowtable: " + str(self.flow_table))
+                print("4 byte header: " + str(self.src_IP) + ", " + str(self.dest_IP) + ", " + str(self.srcp) + ", " + str(self.destp))
 			
 
 	#returns an array of parsed data, first element is transport info such as IP and port, second element is message
     def parse_data(self, data):
-        transport_and_message = data.split("\n")
+        transport_and_message = str(data.decode()).split("\n")
         transport_info = transport_and_message[0]
         message = transport_and_message[1]
         return [transport_info, message]
@@ -104,80 +89,74 @@ class Router:
         #for loop to count and/or's
         for temp in match_split:
             el = temp.strip()
-            print("match list: " + el)
             if not is_match:
                 return False;
             comp_number = int(el[-2:])
 
             if ">" in el:
-                print("YEEEEEEEEEEEEEEEEEEEEEEE, el: " + el)
                 if "sra" in el:
-                    if not src_IP > comp_number:
+                    if not int(src_IP) > comp_number:
                         is_match = False;
                 elif "dsa" in el:
-                    if not dest_IP > comp_number:
+                    if not int(dest_IP) > comp_number:
                         is_match = False;
                 elif "srcp" in el:
-                    print("here")
-                    if not src_port > comp_number:
-                        print("here again")
+                    if not int(src_port) > comp_number:
                         is_match = False;
                 elif "dsp" in el:
-                    if not dest_port > comp_number:
+                    if not int(dest_port) > comp_number:
                         is_match = False;
             elif ">=" in el:
                 if "sra" in el:
-                    if not src_IP >= comp_number:
+                    if not int(src_IP) >= comp_number:
                         is_match = False;
                 elif "dsa" in el:
-                    if not dest_IP >= comp_number:
+                    if not int(dest_IP) >= comp_number:
                         is_match = False;
                 elif "srcp" in el:
-                    if not src_port >= comp_number:
+                    if not int(src_port) >= comp_number:
                         is_match = False;
                 elif "dsp" in el:
-                    if not dest_port >= comp_number:
+                    if not int(dest_port) >= comp_number:
                         is_match = False;
             elif "<" in el:
                 if "sra" in el:
-                    if not src_IP < comp_number:
+                    if not int(src_IP) < comp_number:
                         is_match = False;
                         break
                 elif "dsa" in el:
-                    if not dest_IP < comp_number:
+                    if not int(dest_IP) < comp_number:
                         is_match = False;
                         break
                 elif "srcp" in el:
-                    if not src_port < comp_number:
+                    if not int(src_port) < comp_number:
                         is_match = False;
                         break
                 elif "dsp" in el:
-                    if not dest_port < comp_number:
+                    if not int(dest_port) < comp_number:
                         is_match = False;
                         break
             elif "<=" in el:
                 if "sra" in el:
-                    if not src_IP <= comp_number:
+                    if not int(src_IP) <= comp_number:
                         is_match = False;
                         break
                 elif "dsa" in el:
-                    if not dest_IP <= comp_number:
+                    if not int(dest_IP) <= comp_number:
                         is_match = False;
                         break
                 elif "srcp" in el:
-                    if not src_port <= comp_number:
+                    if not int(src_port) <= comp_number:
                         is_match = False;
                         break
                 elif "dsp" in el:
-                    if not dest_port <= comp_number:
+                    if not int(dest_port) <= comp_number:
                         is_match = False;
                         break
         if is_match:
             #src=21 srp=40 forward(B)
             stuff = action.split(" ")
-            print("stttuffff: " + str(stuff))
             for parsed_actions in stuff:
-                print("thing: " + parsed_actions)
                 if not parsed_actions == "forward(B)" and not parsed_actions == "drop":
                     num = parsed_actions[-2:]
                     if "src" in parsed_actions:
@@ -189,7 +168,6 @@ class Router:
                     elif "dsp" in parsed_actions:
                         dsp = num
                         if parsed_actions == "drop":
-                            print("dropped")
                             return False
                             if parsed_actions == "forward(B)":
                                 return True
